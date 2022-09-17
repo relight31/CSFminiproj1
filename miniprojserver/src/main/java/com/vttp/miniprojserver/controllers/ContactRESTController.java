@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.vttp.miniprojserver.models.Contact;
+import com.vttp.miniprojserver.models.Response;
 import com.vttp.miniprojserver.services.ContactService;
 
 import jakarta.json.Json;
@@ -27,19 +28,24 @@ public class ContactRESTController {
 
     @PostMapping(path = "/addcontact", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> addContact(@RequestBody String payload) {
+        Response resp = new Response();
         try {
             Contact contact = Contact.jsonStringToContact(payload);
             if (service.addContact(contact)) {
+                resp.setCode("201");
+                resp.setMessage("Created new contact");
                 return ResponseEntity
                         .status(HttpStatus.CREATED)
-                        .body("{'message': 'Created new contact'}");
+                        .body(resp.toString());
             } else {
                 throw new Exception("Could not add new contact");
             }
         } catch (Exception e) {
+            resp.setCode("400");
+            resp.setMessage(e.getMessage());
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
-                    .body(e.getMessage());
+                    .body(resp.toString());
         }
     }
 
